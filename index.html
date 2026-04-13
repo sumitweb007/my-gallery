@@ -1,190 +1,551 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>My Life Gallery</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>My Gallery</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: #0b0b0b;
-      color: white;
-    }
-
-    h1 {
-      text-align: center;
-      padding: 20px;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: auto;
-      padding: 20px;
-    }
-
-    /* Upload box */
-    .upload-box {
-      background: rgba(255,255,255,0.05);
-      padding: 15px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-    }
-
-    input, select, button {
-      width: 100%;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 8px;
-      border: none;
-    }
-
-    button {
-      background: #ff3b3b;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    /* Filter */
-    .filters {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-    }
-
-    .filters button {
-      flex: 1;
-      background: #222;
-    }
-
-    /* Gallery */
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-    }
-
-    .card {
-      background: rgba(255,255,255,0.05);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    .card img {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-    }
-
-    .caption {
-      padding: 10px;
-      font-size: 14px;
-    }
-
-    .category {
-      font-size: 12px;
-      color: #aaa;
-      padding: 0 10px 10px;
-    }
-
-  </style>
-</head>
-
-<body>
-
-<h1>🌍 My Life Gallery</h1>
-
-<div class="container">
-
-  <!-- Upload Section -->
-  <div class="upload-box">
-    <input type="file" id="imageInput" accept="image/*">
-    
-    <input type="text" id="caption" placeholder="Write caption">
-
-    <select id="category">
-      <option value="Travel">Travel</option>
-      <option value="Birds">Birds</option>
-      <option value="School">School</option>
-      <option value="Sky">Sky</option>
-      <option value="Leaves">Leaves</option>
-    </select>
-
-    <button onclick="addPost()">Add to Gallery</button>
-  </div>
-
-  <!-- Filters -->
-  <div class="filters">
-    <button onclick="filter('All')">All</button>
-    <button onclick="filter('Travel')">Travel</button>
-    <button onclick="filter('Birds')">Birds</button>
-    <button onclick="filter('School')">School</button>
-    <button onclick="filter('Sky')">Sky</button>
-    <button onclick="filter('Leaves')">Leaves</button>
-  </div>
-
-  <!-- Gallery -->
-  <div class="gallery" id="gallery"></div>
-
-</div>
-
-<script>
-let posts = JSON.parse(localStorage.getItem("posts")) || [];
-let currentFilter = "All";
-
-function addPost() {
-  let file = document.getElementById("imageInput").files[0];
-  let caption = document.getElementById("caption").value;
-  let category = document.getElementById("category").value;
-
-  if (!file) {
-    alert("Select an image");
-    return;
+  :root {
+    --accent: #6C63FF;
+    --accent-light: #EAE9FF;
+    --bg: #fafafa;
+    --surface: #ffffff;
+    --text: #111111;
+    --text-muted: #666666;
+    --border: rgba(0,0,0,0.10);
+    --radius: 14px;
+    --nav-h: 64px;
+    --font: 'Inter', system-ui, sans-serif;
   }
 
-  let reader = new FileReader();
-
-  reader.onload = function(e) {
-    let post = {
-      image: e.target.result,
-      caption: caption,
-      category: category
-    };
-
-    posts.push(post);
-    localStorage.setItem("posts", JSON.stringify(posts));
-
-    render();
-  };
-
-  reader.readAsDataURL(file);
-}
-
-function render() {
-  let gallery = document.getElementById("gallery");
-  gallery.innerHTML = "";
-
-  posts.forEach((p) => {
-    if (currentFilter === "All" || p.category === currentFilter) {
-      gallery.innerHTML += `
-        <div class="card">
-          <img src="${p.image}">
-          <div class="caption">${p.caption}</div>
-          <div class="category">#${p.category}</div>
-        </div>
-      `;
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --text: #f0f0f0;
+      --text-muted: #888888;
+      --border: rgba(255,255,255,0.10);
+      --accent-light: #2a2860;
     }
-  });
+  }
+
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* ── NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    height: var(--nav-h);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px;
+    backdrop-filter: blur(12px);
+  }
+  .nav-logo { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; color: var(--accent); }
+  .nav-actions { display: flex; gap: 10px; align-items: center; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 18px; border-radius: 100px;
+    font-size: 14px; font-weight: 500; cursor: pointer;
+    border: none; transition: all 0.18s ease;
+    font-family: var(--font);
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #5a52e0; transform: translateY(-1px); }
+  .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
+  .btn-ghost:hover { background: var(--bg); color: var(--text); }
+  .btn-danger { background: #ff4444; color: #fff; }
+  .btn-danger:hover { background: #e03333; }
+  .btn svg { width: 16px; height: 16px; }
+
+  /* ── HERO ── */
+  .hero {
+    text-align: center; padding: 56px 24px 40px;
+    max-width: 520px; margin: 0 auto;
+  }
+  .hero h1 { font-size: clamp(28px, 5vw, 40px); font-weight: 700; letter-spacing: -1px; line-height: 1.15; }
+  .hero p { margin-top: 10px; color: var(--text-muted); font-size: 16px; }
+
+  /* ── CATEGORY BAR ── */
+  .cat-bar {
+    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+    padding: 0 24px 28px;
+    max-width: 900px; margin: 0 auto;
+  }
+  .cat-pill {
+    padding: 7px 16px; border-radius: 100px; font-size: 13px; font-weight: 500;
+    cursor: pointer; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text-muted);
+    transition: all 0.15s; user-select: none;
+  }
+  .cat-pill:hover { border-color: var(--accent); color: var(--accent); }
+  .cat-pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* ── GRID ── */
+  .grid-wrap { max-width: 1100px; margin: 0 auto; padding: 0 16px 80px; }
+  .photo-grid {
+    columns: 3; gap: 12px;
+  }
+  @media (max-width: 900px) { .photo-grid { columns: 2; } }
+  @media (max-width: 540px) { .photo-grid { columns: 1; } }
+
+  .photo-card {
+    break-inside: avoid; margin-bottom: 12px;
+    border-radius: var(--radius); overflow: hidden;
+    background: var(--surface); border: 1px solid var(--border);
+    position: relative; cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .photo-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
+  .photo-card img {
+    width: 100%; display: block;
+    object-fit: cover; max-height: 420px;
+  }
+  .card-info { padding: 10px 12px; }
+  .card-caption { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.4; }
+  .card-cat {
+    display: inline-block; margin-top: 5px;
+    padding: 3px 10px; border-radius: 100px;
+    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;
+    background: var(--accent-light); color: var(--accent);
+  }
+  .card-delete {
+    position: absolute; top: 8px; right: 8px;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: rgba(0,0,0,0.55); color: #fff; border: none;
+    font-size: 14px; cursor: pointer; display: none;
+    align-items: center; justify-content: center;
+    transition: background 0.15s; backdrop-filter: blur(4px);
+  }
+  .photo-card:hover .card-delete { display: flex; }
+  .card-delete:hover { background: #ff4444; }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center; padding: 80px 24px; color: var(--text-muted);
+  }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
+  .empty-state p { font-size: 16px; }
+
+  /* ── MODAL OVERLAY ── */
+  .modal-bg {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.55);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-bg.hidden { display: none; }
+  .modal {
+    background: var(--surface); border-radius: 20px;
+    width: 100%; max-width: 440px;
+    padding: 28px; position: relative;
+    border: 1px solid var(--border);
+  }
+  .modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+  .modal-close {
+    position: absolute; top: 16px; right: 16px;
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 1px solid var(--border); background: var(--bg);
+    cursor: pointer; font-size: 18px; color: var(--text-muted);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font);
+  }
+  .modal-close:hover { color: var(--text); }
+
+  /* ── FORM ── */
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 5px; color: var(--text-muted); }
+  .field input, .field select, .field textarea {
+    width: 100%; padding: 10px 12px; border-radius: 10px;
+    border: 1px solid var(--border); background: var(--bg);
+    font-size: 14px; color: var(--text); font-family: var(--font);
+    outline: none; transition: border-color 0.15s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color: var(--accent);
+  }
+  .field textarea { resize: none; height: 70px; }
+
+  /* ── IMAGE PREVIEW ── */
+  #img-preview-wrap { display: none; margin-bottom: 14px; }
+  #img-preview-wrap img {
+    width: 100%; border-radius: 10px; max-height: 200px;
+    object-fit: cover; border: 1px solid var(--border);
+  }
+
+  /* ── DROP ZONE ── */
+  .drop-zone {
+    border: 2px dashed var(--border); border-radius: 12px;
+    padding: 28px; text-align: center; cursor: pointer;
+    transition: border-color 0.15s, background 0.15s; margin-bottom: 14px;
+  }
+  .drop-zone:hover, .drop-zone.drag-over {
+    border-color: var(--accent); background: var(--accent-light);
+  }
+  .drop-zone p { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+
+  /* ── LIGHTBOX ── */
+  .lightbox {
+    position: fixed; inset: 0; z-index: 300;
+    background: rgba(0,0,0,0.9);
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .lightbox.hidden { display: none; }
+  .lightbox img { max-width: 90vw; max-height: 85vh; border-radius: 8px; object-fit: contain; }
+  .lightbox-close {
+    position: absolute; top: 20px; right: 20px;
+    background: rgba(255,255,255,0.1); color: #fff;
+    border: none; width: 40px; height: 40px; border-radius: 50%;
+    font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .lightbox-caption {
+    position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+    color: #fff; font-size: 14px; text-align: center;
+    background: rgba(0,0,0,0.5); padding: 8px 18px; border-radius: 100px;
+    backdrop-filter: blur(6px);
+  }
+
+  /* ── MANAGE CATEGORIES ── */
+  .cat-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+  .cat-tag {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 12px; border-radius: 100px; font-size: 12px; font-weight: 500;
+    background: var(--accent-light); color: var(--accent);
+  }
+  .cat-tag button {
+    border: none; background: none; color: var(--accent); cursor: pointer; font-size: 14px; line-height: 1; padding: 0;
+  }
+  .add-cat-row { display: flex; gap: 8px; }
+  .add-cat-row input { flex: 1; }
+
+  /* ── TOAST ── */
+  #toast {
+    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+    background: #111; color: #fff; font-size: 13px; font-weight: 500;
+    padding: 10px 20px; border-radius: 100px; z-index: 999;
+    opacity: 0; transition: opacity 0.25s; pointer-events: none;
+  }
+  #toast.show { opacity: 1; }
+
+  /* ── STATS BAR ── */
+  .stats { text-align: center; padding-bottom: 16px; font-size: 13px; color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <span class="nav-logo">&#9670; My Gallery</span>
+  <div class="nav-actions">
+    <button class="btn btn-ghost" onclick="openCatModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h8M4 18h12"/></svg>
+      Categories
+    </button>
+    <button class="btn btn-primary" onclick="openUploadModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
+      Add Photo
+    </button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>My Personal Gallery</h1>
+  <p>A beautiful collection of things I love ✦</p>
+</div>
+
+<!-- CATEGORY BAR -->
+<div class="cat-bar" id="cat-bar">
+  <!-- pills injected by JS -->
+</div>
+
+<!-- STATS -->
+<div class="stats" id="stats-bar"></div>
+
+<!-- GRID -->
+<div class="grid-wrap">
+  <div class="photo-grid" id="photo-grid"></div>
+  <div class="empty-state hidden" id="empty-state">
+    <div class="icon">&#128247;</div>
+    <p>No photos yet. Click <strong>Add Photo</strong> to start!</p>
+  </div>
+</div>
+
+<!-- ── UPLOAD MODAL ── -->
+<div class="modal-bg hidden" id="upload-modal">
+  <div class="modal">
+    <h2>Add a Photo</h2>
+    <button class="modal-close" onclick="closeUploadModal()">&#215;</button>
+
+    <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--accent);margin:0 auto;display:block"><path d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+      <p>Click or drag &amp; drop image here</p>
+      <p style="font-size:11px;margin-top:3px">JPG, PNG, WebP, GIF supported</p>
+    </div>
+    <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFile(event)" />
+
+    <div id="img-preview-wrap">
+      <img id="img-preview" src="" alt="Preview" />
+    </div>
+
+    <div class="field">
+      <label>Caption</label>
+      <textarea id="caption-input" placeholder="Describe this photo…"></textarea>
+    </div>
+    <div class="field">
+      <label>Category</label>
+      <select id="cat-select">
+        <!-- options injected by JS -->
+      </select>
+    </div>
+
+    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="addPhoto()">Save to Gallery</button>
+  </div>
+</div>
+
+<!-- ── CATEGORIES MODAL ── -->
+<div class="modal-bg hidden" id="cat-modal">
+  <div class="modal">
+    <h2>Manage Categories</h2>
+    <button class="modal-close" onclick="document.getElementById('cat-modal').classList.add('hidden')">&#215;</button>
+    <div class="cat-list" id="cat-list"></div>
+    <div class="add-cat-row">
+      <input type="text" id="new-cat-input" placeholder="New category…" onkeydown="if(event.key==='Enter')addCategory()" />
+      <button class="btn btn-primary" onclick="addCategory()">Add</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── LIGHTBOX ── -->
+<div class="lightbox hidden" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">&#215;</button>
+  <img id="lightbox-img" src="" alt="" />
+  <div class="lightbox-caption" id="lightbox-caption"></div>
+</div>
+
+<!-- ── TOAST ── -->
+<div id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'gallery_v2';
+const CAT_KEY = 'gallery_cats_v2';
+
+const DEFAULT_CATS = ['Travel', 'Birds', 'School', 'Sky', 'Leaves', 'Food', 'People', 'Nature'];
+
+function loadData() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; }
+}
+function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+function loadCats() {
+  try { return JSON.parse(localStorage.getItem(CAT_KEY)) || DEFAULT_CATS; } catch { return DEFAULT_CATS; }
+}
+function saveCats(c) { localStorage.setItem(CAT_KEY, JSON.stringify(c)); }
+
+let photos = loadData();
+let categories = loadCats();
+let activeFilter = 'All';
+let pendingDataUrl = null;
+
+/* ── RENDER ── */
+function render() {
+  renderCatBar();
+  renderGrid();
+  renderCatModal();
+  renderCatSelect();
+  renderStats();
 }
 
-function filter(cat) {
-  currentFilter = cat;
+function renderCatBar() {
+  const bar = document.getElementById('cat-bar');
+  const all = ['All', ...categories];
+  bar.innerHTML = all.map(c =>
+    `<div class="cat-pill${activeFilter===c?' active':''}" onclick="filterBy('${c}')">${c}</div>`
+  ).join('');
+}
+
+function renderStats() {
+  const total = photos.length;
+  const filtered = getFiltered().length;
+  const el = document.getElementById('stats-bar');
+  if (!total) { el.textContent = ''; return; }
+  el.textContent = activeFilter === 'All'
+    ? `${total} photo${total!==1?'s':''} · ${categories.length} categories`
+    : `${filtered} photo${filtered!==1?'s':''} in "${activeFilter}"`;
+}
+
+function getFiltered() {
+  return activeFilter === 'All' ? photos : photos.filter(p => p.cat === activeFilter);
+}
+
+function renderGrid() {
+  const grid = document.getElementById('photo-grid');
+  const empty = document.getElementById('empty-state');
+  const filtered = getFiltered();
+  if (!filtered.length) {
+    grid.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+  grid.innerHTML = filtered.map((p, i) => `
+    <div class="photo-card" data-id="${p.id}">
+      <img src="${p.src}" alt="${escHtml(p.caption)}" loading="lazy"
+        onclick="openLightbox('${p.id}')" />
+      <div class="card-info">
+        <div class="card-caption">${escHtml(p.caption) || '<span style="color:var(--text-muted);font-style:italic">No caption</span>'}</div>
+        <span class="card-cat">${escHtml(p.cat)}</span>
+      </div>
+      <button class="card-delete" onclick="deletePhoto('${p.id}')" title="Delete photo">&#215;</button>
+    </div>
+  `).join('');
+}
+
+function renderCatSelect() {
+  const sel = document.getElementById('cat-select');
+  sel.innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join('');
+}
+
+function renderCatModal() {
+  const list = document.getElementById('cat-list');
+  list.innerHTML = categories.map(c =>
+    `<span class="cat-tag">${escHtml(c)} <button onclick="deleteCategory('${c}')" title="Remove">&times;</button></span>`
+  ).join('');
+}
+
+/* ── FILTER ── */
+function filterBy(cat) {
+  activeFilter = cat;
   render();
 }
 
+/* ── ADD PHOTO ── */
+function openUploadModal() {
+  pendingDataUrl = null;
+  document.getElementById('img-preview-wrap').style.display = 'none';
+  document.getElementById('caption-input').value = '';
+  document.getElementById('file-input').value = '';
+  document.getElementById('upload-modal').classList.remove('hidden');
+}
+function closeUploadModal() {
+  document.getElementById('upload-modal').classList.add('hidden');
+  pendingDataUrl = null;
+}
+
+function handleFile(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    pendingDataUrl = ev.target.result;
+    const preview = document.getElementById('img-preview');
+    preview.src = pendingDataUrl;
+    document.getElementById('img-preview-wrap').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function addPhoto() {
+  if (!pendingDataUrl) { toast('Please select an image first!'); return; }
+  const caption = document.getElementById('caption-input').value.trim();
+  const cat = document.getElementById('cat-select').value;
+  photos.unshift({ id: uid(), src: pendingDataUrl, caption, cat, ts: Date.now() });
+  saveData(photos);
+  closeUploadModal();
+  render();
+  toast('Photo added!');
+}
+
+/* ── DELETE ── */
+function deletePhoto(id) {
+  if (!confirm('Delete this photo?')) return;
+  photos = photos.filter(p => p.id !== id);
+  saveData(photos);
+  render();
+  toast('Photo deleted');
+}
+
+/* ── LIGHTBOX ── */
+function openLightbox(id) {
+  const p = photos.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('lightbox-img').src = p.src;
+  document.getElementById('lightbox-caption').textContent =
+    (p.caption ? p.caption + ' · ' : '') + p.cat;
+  document.getElementById('lightbox').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeLightbox(); closeUploadModal(); } });
+
+/* ── CATEGORIES ── */
+function openCatModal() {
+  renderCatModal();
+  document.getElementById('cat-modal').classList.remove('hidden');
+}
+function addCategory() {
+  const inp = document.getElementById('new-cat-input');
+  const val = inp.value.trim();
+  if (!val) return;
+  if (categories.map(c=>c.toLowerCase()).includes(val.toLowerCase())) { toast('Already exists!'); return; }
+  categories.push(val.charAt(0).toUpperCase() + val.slice(1));
+  saveCats(categories);
+  inp.value = '';
+  render();
+  toast(`"${val}" added`);
+}
+function deleteCategory(cat) {
+  const inUse = photos.some(p => p.cat === cat);
+  if (inUse && !confirm(`"${cat}" is used by some photos. Delete anyway?`)) return;
+  categories = categories.filter(c => c !== cat);
+  saveCats(categories);
+  if (activeFilter === cat) activeFilter = 'All';
+  render();
+  toast(`"${cat}" removed`);
+}
+
+/* ── DRAG & DROP ── */
+const dz = document.getElementById('drop-zone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault();
+  dz.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (!file || !file.type.startsWith('image/')) { toast('Please drop an image file'); return; }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    pendingDataUrl = ev.target.result;
+    document.getElementById('img-preview').src = pendingDataUrl;
+    document.getElementById('img-preview-wrap').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+});
+
+/* ── TOAST ── */
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+/* ── HELPERS ── */
+function uid() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
+function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ── INIT ── */
 render();
 </script>
-
 </body>
 </html>
