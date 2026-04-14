@@ -1,551 +1,620 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>My Gallery</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Glimpse — Gallery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet"/>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0a;--surface:#141414;--surface2:#1e1e1e;
+  --border:rgba(255,255,255,0.08);--border2:rgba(255,255,255,0.18);
+  --text:#f0ede8;--muted:#777;
+  --gold:#c9a96e;--gold-lt:#e8d5b0;--gold-glow:rgba(201,169,110,0.14);
+  --danger:#ff5050;
+  --r:16px;--nav:62px;
+  --sans:'DM Sans',sans-serif;--serif:'DM Serif Display',serif;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12);border-radius:3px}
 
-  :root {
-    --accent: #6C63FF;
-    --accent-light: #EAE9FF;
-    --bg: #fafafa;
-    --surface: #ffffff;
-    --text: #111111;
-    --text-muted: #666666;
-    --border: rgba(0,0,0,0.10);
-    --radius: 14px;
-    --nav-h: 64px;
-    --font: 'Inter', system-ui, sans-serif;
-  }
+/* NAV */
+nav{position:sticky;top:0;z-index:200;height:var(--nav);background:rgba(10,10,10,0.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 22px}
+.logo{font-family:var(--serif);font-size:24px;background:linear-gradient(130deg,var(--gold-lt),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.nav-r{display:flex;align-items:center;gap:9px}
 
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0f0f0f;
-      --surface: #1a1a1a;
-      --text: #f0f0f0;
-      --text-muted: #888888;
-      --border: rgba(255,255,255,0.10);
-      --accent-light: #2a2860;
-    }
-  }
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border-radius:100px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .18s;font-family:var(--sans);line-height:1}
+.btn-gold{background:linear-gradient(135deg,var(--gold-lt),var(--gold));color:#0a0a0a;font-weight:600}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 8px 28px rgba(201,169,110,.28)}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--border2);color:var(--text)}
+.btn-outline{background:transparent;color:var(--gold);border:1px solid var(--gold)}
+.btn-outline:hover{background:var(--gold-glow)}
+.btn-full{width:100%}
+.btn svg{width:14px;height:14px;flex-shrink:0}
 
-  html { scroll-behavior: smooth; }
-  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+/* AVATAR */
+.av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--gold-lt),var(--gold));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#0a0a0a;cursor:pointer;overflow:hidden;flex-shrink:0;border:2px solid var(--gold)}
+.av img{width:100%;height:100%;object-fit:cover}
 
-  /* ── NAV ── */
-  nav {
-    position: sticky; top: 0; z-index: 100;
-    height: var(--nav-h);
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 24px;
-    backdrop-filter: blur(12px);
-  }
-  .nav-logo { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; color: var(--accent); }
-  .nav-actions { display: flex; gap: 10px; align-items: center; }
+/* CONFIG */
+#cfg{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse 80% 50% at 50% -5%,rgba(201,169,110,.1),transparent 65%)}
+.cfg-card{width:100%;max-width:500px;background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:38px 34px}
+.cfg-card h1{font-family:var(--serif);font-size:30px;color:var(--gold);margin-bottom:6px}
+.cfg-card>p{color:var(--muted);font-size:14px;margin-bottom:22px;line-height:1.65}
+.code-block{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;font-family:monospace;font-size:11.5px;color:var(--gold);margin-bottom:14px;line-height:1.75;white-space:pre-wrap;word-break:break-all}
+.steps{font-size:13px;color:var(--muted);line-height:1.8;margin-top:16px}
+.steps strong{color:var(--gold)}
 
-  /* ── BUTTONS ── */
-  .btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 9px 18px; border-radius: 100px;
-    font-size: 14px; font-weight: 500; cursor: pointer;
-    border: none; transition: all 0.18s ease;
-    font-family: var(--font);
-  }
-  .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover { background: #5a52e0; transform: translateY(-1px); }
-  .btn-ghost { background: transparent; color: var(--text-muted); border: 1px solid var(--border); }
-  .btn-ghost:hover { background: var(--bg); color: var(--text); }
-  .btn-danger { background: #ff4444; color: #fff; }
-  .btn-danger:hover { background: #e03333; }
-  .btn svg { width: 16px; height: 16px; }
+/* AUTH */
+#auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(ellipse 80% 50% at 50% -5%,rgba(201,169,110,.1),transparent 65%)}
+.auth-card{width:100%;max-width:390px;background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:38px 34px;position:relative;overflow:hidden}
+.auth-card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(201,169,110,.04),transparent 55%);pointer-events:none}
+.auth-logo{font-family:var(--serif);font-size:38px;background:linear-gradient(130deg,var(--gold-lt),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.auth-tagline{color:var(--muted);font-size:14px;font-style:italic;margin-bottom:26px;margin-top:4px}
+.g-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:12px;border-radius:11px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:14px;font-weight:500;cursor:pointer;font-family:var(--sans);transition:all .18s}
+.g-btn:hover{border-color:var(--border2)}
+.g-btn svg{width:18px;height:18px;flex-shrink:0}
+.divider{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:12px;margin:18px 0}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.auth-switch{margin-top:16px;text-align:center;font-size:13px;color:var(--muted)}
+.auth-switch span{color:var(--gold);cursor:pointer;font-weight:500}
+.auth-switch span:hover{text-decoration:underline}
 
-  /* ── HERO ── */
-  .hero {
-    text-align: center; padding: 56px 24px 40px;
-    max-width: 520px; margin: 0 auto;
-  }
-  .hero h1 { font-size: clamp(28px, 5vw, 40px); font-weight: 700; letter-spacing: -1px; line-height: 1.15; }
-  .hero p { margin-top: 10px; color: var(--text-muted); font-size: 16px; }
+/* FIELDS */
+.field{margin-bottom:13px}
+.field label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:.7px}
+.field input,.field select,.field textarea{width:100%;padding:11px 13px;border-radius:10px;background:var(--surface2);border:1px solid var(--border);color:var(--text);font-size:14px;font-family:var(--sans);outline:none;transition:border-color .15s}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold)}
+.field select option{background:var(--surface2)}
+.field textarea{resize:none;height:70px}
+.field input::placeholder,.field textarea::placeholder{color:var(--muted)}
 
-  /* ── CATEGORY BAR ── */
-  .cat-bar {
-    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
-    padding: 0 24px 28px;
-    max-width: 900px; margin: 0 auto;
-  }
-  .cat-pill {
-    padding: 7px 16px; border-radius: 100px; font-size: 13px; font-weight: 500;
-    cursor: pointer; border: 1px solid var(--border);
-    background: var(--surface); color: var(--text-muted);
-    transition: all 0.15s; user-select: none;
-  }
-  .cat-pill:hover { border-color: var(--accent); color: var(--accent); }
-  .cat-pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+/* MAIN */
+#app{display:none}
+.hero{text-align:center;padding:52px 24px 34px;max-width:540px;margin:0 auto}
+.hero h1{font-family:var(--serif);font-size:clamp(30px,5vw,46px);line-height:1.1;letter-spacing:-1px;background:linear-gradient(155deg,#f0ede8 30%,var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{margin-top:9px;color:var(--muted);font-size:15px;font-style:italic}
 
-  /* ── GRID ── */
-  .grid-wrap { max-width: 1100px; margin: 0 auto; padding: 0 16px 80px; }
-  .photo-grid {
-    columns: 3; gap: 12px;
-  }
-  @media (max-width: 900px) { .photo-grid { columns: 2; } }
-  @media (max-width: 540px) { .photo-grid { columns: 1; } }
+/* CAT BAR */
+.cat-bar{max-width:900px;margin:0 auto;padding:0 18px 22px;display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.pill{padding:7px 15px;border-radius:100px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all .15s;user-select:none}
+.pill:hover{border-color:var(--gold);color:var(--gold)}
+.pill.active{background:linear-gradient(135deg,var(--gold-lt),var(--gold));color:#0a0a0a;border-color:transparent;font-weight:700}
 
-  .photo-card {
-    break-inside: avoid; margin-bottom: 12px;
-    border-radius: var(--radius); overflow: hidden;
-    background: var(--surface); border: 1px solid var(--border);
-    position: relative; cursor: pointer;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  .photo-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
-  .photo-card img {
-    width: 100%; display: block;
-    object-fit: cover; max-height: 420px;
-  }
-  .card-info { padding: 10px 12px; }
-  .card-caption { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.4; }
-  .card-cat {
-    display: inline-block; margin-top: 5px;
-    padding: 3px 10px; border-radius: 100px;
-    font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px;
-    background: var(--accent-light); color: var(--accent);
-  }
-  .card-delete {
-    position: absolute; top: 8px; right: 8px;
-    width: 30px; height: 30px; border-radius: 50%;
-    background: rgba(0,0,0,0.55); color: #fff; border: none;
-    font-size: 14px; cursor: pointer; display: none;
-    align-items: center; justify-content: center;
-    transition: background 0.15s; backdrop-filter: blur(4px);
-  }
-  .photo-card:hover .card-delete { display: flex; }
-  .card-delete:hover { background: #ff4444; }
+/* GRID */
+.grid-outer{max-width:1100px;margin:0 auto;padding:0 13px 80px}
+.grid{columns:3;gap:11px}
+@media(max-width:900px){.grid{columns:2}}
+@media(max-width:500px){.grid{columns:1}}
+.card{break-inside:avoid;margin-bottom:11px;border-radius:var(--r);overflow:hidden;background:var(--surface);border:1px solid var(--border);position:relative;cursor:pointer;transition:transform .22s,border-color .22s}
+.card:hover{transform:translateY(-4px);border-color:var(--border2)}
+.card img{width:100%;display:block;object-fit:cover;max-height:450px;background:var(--surface2)}
+.overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.78) 0%,transparent 50%);opacity:0;transition:opacity .2s;display:flex;flex-direction:column;justify-content:flex-end;padding:13px}
+.card:hover .overlay{opacity:1}
+.ov-caption{font-size:13px;font-weight:500;color:#fff;line-height:1.4}
+.ov-cat{display:inline-block;margin-top:5px;padding:3px 10px;border-radius:100px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;background:rgba(201,169,110,.22);color:var(--gold);border:1px solid rgba(201,169,110,.28);width:fit-content}
+.ov-author{font-size:11px;color:rgba(255,255,255,.55);margin-top:5px;display:flex;align-items:center;gap:5px}
+.ov-av{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,var(--gold-lt),var(--gold));display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#0a0a0a;overflow:hidden;flex-shrink:0}
+.ov-av img{width:100%;height:100%;object-fit:cover}
+.del-btn{position:absolute;top:9px;right:9px;width:28px;height:28px;border-radius:50%;background:rgba(220,30,30,.75);color:#fff;border:none;font-size:15px;cursor:pointer;display:none;align-items:center;justify-content:center;backdrop-filter:blur(4px);transition:background .15s;line-height:1}
+.card:hover .del-btn.mine{display:flex}
+.del-btn:hover{background:rgba(220,30,30,1)}
 
-  /* ── EMPTY STATE ── */
-  .empty-state {
-    text-align: center; padding: 80px 24px; color: var(--text-muted);
-  }
-  .empty-state .icon { font-size: 48px; margin-bottom: 12px; opacity: 0.5; }
-  .empty-state p { font-size: 16px; }
+/* EMPTY */
+.empty{text-align:center;padding:80px 24px;color:var(--muted)}
+.empty-ico{font-size:48px;opacity:.25;margin-bottom:12px}
+.empty p{font-size:16px;font-style:italic}
 
-  /* ── MODAL OVERLAY ── */
-  .modal-bg {
-    position: fixed; inset: 0; z-index: 200;
-    background: rgba(0,0,0,0.55);
-    display: flex; align-items: center; justify-content: center;
-    padding: 20px;
-  }
-  .modal-bg.hidden { display: none; }
-  .modal {
-    background: var(--surface); border-radius: 20px;
-    width: 100%; max-width: 440px;
-    padding: 28px; position: relative;
-    border: 1px solid var(--border);
-  }
-  .modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
-  .modal-close {
-    position: absolute; top: 16px; right: 16px;
-    width: 32px; height: 32px; border-radius: 50%;
-    border: 1px solid var(--border); background: var(--bg);
-    cursor: pointer; font-size: 18px; color: var(--text-muted);
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--font);
-  }
-  .modal-close:hover { color: var(--text); }
+/* MODAL */
+.mb{position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.72);backdrop-filter:blur(7px);display:flex;align-items:center;justify-content:center;padding:20px}
+.mb.h{display:none}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:22px;width:100%;max-width:450px;padding:30px;position:relative;max-height:92vh;overflow-y:auto}
+.modal h2{font-family:var(--serif);font-size:22px;margin-bottom:20px;color:var(--text)}
+.mclose{position:absolute;top:15px;right:15px;width:30px;height:30px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);color:var(--muted);cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center;font-family:var(--sans);transition:all .15s}
+.mclose:hover{color:var(--text);border-color:var(--border2)}
 
-  /* ── FORM ── */
-  .field { margin-bottom: 14px; }
-  .field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 5px; color: var(--text-muted); }
-  .field input, .field select, .field textarea {
-    width: 100%; padding: 10px 12px; border-radius: 10px;
-    border: 1px solid var(--border); background: var(--bg);
-    font-size: 14px; color: var(--text); font-family: var(--font);
-    outline: none; transition: border-color 0.15s;
-  }
-  .field input:focus, .field select:focus, .field textarea:focus {
-    border-color: var(--accent);
-  }
-  .field textarea { resize: none; height: 70px; }
+/* DROP ZONE */
+.dz{border:2px dashed var(--border);border-radius:12px;padding:28px;text-align:center;cursor:pointer;transition:all .18s;margin-bottom:14px;background:var(--surface2)}
+.dz:hover,.dz.over{border-color:var(--gold);background:var(--gold-glow)}
+.dz-ico{font-size:26px;opacity:.4;margin-bottom:7px}
+.dz p{font-size:13px;color:var(--muted)}
+#prev-wrap{display:none;margin-bottom:14px}
+#prev-wrap img{width:100%;border-radius:10px;max-height:210px;object-fit:cover;border:1px solid var(--border)}
 
-  /* ── IMAGE PREVIEW ── */
-  #img-preview-wrap { display: none; margin-bottom: 14px; }
-  #img-preview-wrap img {
-    width: 100%; border-radius: 10px; max-height: 200px;
-    object-fit: cover; border: 1px solid var(--border);
-  }
+/* PROGRESS */
+.prog-outer{display:none;margin:10px 0}
+.prog-bar{height:3px;background:var(--border);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--gold-lt),var(--gold));width:0%;transition:width .15s;border-radius:3px}
+.prog-lbl{font-size:11px;color:var(--muted);text-align:center;margin-top:4px}
 
-  /* ── DROP ZONE ── */
-  .drop-zone {
-    border: 2px dashed var(--border); border-radius: 12px;
-    padding: 28px; text-align: center; cursor: pointer;
-    transition: border-color 0.15s, background 0.15s; margin-bottom: 14px;
-  }
-  .drop-zone:hover, .drop-zone.drag-over {
-    border-color: var(--accent); background: var(--accent-light);
-  }
-  .drop-zone p { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+/* LIGHTBOX */
+.lb{position:fixed;inset:0;z-index:400;background:rgba(0,0,0,.96);display:flex;align-items:center;justify-content:center;padding:20px}
+.lb.h{display:none}
+.lb-inner{position:relative;max-width:88vw;max-height:86vh}
+.lb-inner img{max-width:88vw;max-height:80vh;border-radius:10px;object-fit:contain;display:block}
+.lb-info{position:absolute;bottom:-42px;left:0;right:0;display:flex;align-items:center;justify-content:space-between}
+.lb-cap{font-size:13px;font-weight:500;color:rgba(255,255,255,.8)}
+.lb-auth{font-size:11px;color:rgba(255,255,255,.45);margin-top:2px}
+.lb-cat-badge{padding:3px 10px;border-radius:100px;background:rgba(201,169,110,.2);color:var(--gold);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;border:1px solid rgba(201,169,110,.25)}
+.lb-close{position:absolute;top:14px;right:14px;width:38px;height:38px;border-radius:50%;background:rgba(255,255,255,.1);color:#fff;border:none;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(5px);transition:background .15s;font-family:var(--sans)}
+.lb-close:hover{background:rgba(255,255,255,.2)}
 
-  /* ── LIGHTBOX ── */
-  .lightbox {
-    position: fixed; inset: 0; z-index: 300;
-    background: rgba(0,0,0,0.9);
-    display: flex; align-items: center; justify-content: center;
-    padding: 20px;
-  }
-  .lightbox.hidden { display: none; }
-  .lightbox img { max-width: 90vw; max-height: 85vh; border-radius: 8px; object-fit: contain; }
-  .lightbox-close {
-    position: absolute; top: 20px; right: 20px;
-    background: rgba(255,255,255,0.1); color: #fff;
-    border: none; width: 40px; height: 40px; border-radius: 50%;
-    font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center;
-  }
-  .lightbox-caption {
-    position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-    color: #fff; font-size: 14px; text-align: center;
-    background: rgba(0,0,0,0.5); padding: 8px 18px; border-radius: 100px;
-    backdrop-filter: blur(6px);
-  }
+/* CAT TAGS */
+.cat-tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:13px}
+.ctag{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:100px;font-size:12px;font-weight:500;background:var(--gold-glow);color:var(--gold);border:1px solid rgba(201,169,110,.18)}
+.ctag-x{border:none;background:none;color:var(--muted);cursor:pointer;font-size:15px;line-height:1;padding:0;transition:color .15s}
+.ctag-x:hover{color:var(--danger)}
+.add-cat-row{display:flex;gap:8px;align-items:flex-end}
+.add-cat-row .field{flex:1;margin:0}
 
-  /* ── MANAGE CATEGORIES ── */
-  .cat-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-  .cat-tag {
-    display: inline-flex; align-items: center; gap: 5px;
-    padding: 5px 12px; border-radius: 100px; font-size: 12px; font-weight: 500;
-    background: var(--accent-light); color: var(--accent);
-  }
-  .cat-tag button {
-    border: none; background: none; color: var(--accent); cursor: pointer; font-size: 14px; line-height: 1; padding: 0;
-  }
-  .add-cat-row { display: flex; gap: 8px; }
-  .add-cat-row input { flex: 1; }
+/* USER MENU */
+.umenu{position:absolute;top:calc(var(--nav) + 6px);right:14px;background:var(--surface);border:1px solid var(--border);border-radius:15px;padding:7px;min-width:195px;z-index:250;display:none}
+.umenu.open{display:block}
+.umenu-header{padding:8px 9px 11px;border-bottom:1px solid var(--border);margin-bottom:5px}
+.umenu-name{font-size:14px;font-weight:500}
+.umenu-email{font-size:12px;color:var(--muted);margin-top:2px;word-break:break-all}
+.mi{display:flex;align-items:center;gap:9px;width:100%;padding:9px 10px;border-radius:9px;background:none;border:none;cursor:pointer;font-size:13px;color:var(--text);font-family:var(--sans);transition:background .12s;text-align:left}
+.mi:hover{background:var(--surface2)}
+.mi svg{width:14px;height:14px;color:var(--muted)}
+.mi.red{color:var(--danger)}
+.mi.red svg{color:var(--danger)}
 
-  /* ── TOAST ── */
-  #toast {
-    position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
-    background: #111; color: #fff; font-size: 13px; font-weight: 500;
-    padding: 10px 20px; border-radius: 100px; z-index: 999;
-    opacity: 0; transition: opacity 0.25s; pointer-events: none;
-  }
-  #toast.show { opacity: 1; }
+/* STATS */
+.stats-bar{text-align:center;font-size:12px;color:var(--muted);padding-bottom:13px;letter-spacing:.2px}
 
-  /* ── STATS BAR ── */
-  .stats { text-align: center; padding-bottom: 16px; font-size: 13px; color: var(--text-muted); }
+/* TOAST */
+#toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:13px;font-weight:500;padding:10px 22px;border-radius:100px;z-index:9999;opacity:0;transition:opacity .22s;pointer-events:none;white-space:nowrap}
+#toast.show{opacity:1}
+
+/* LOADER */
+#loader{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.spin{width:34px;height:34px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--gold);animation:sp .7s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.load-logo{font-family:var(--serif);font-size:26px;background:linear-gradient(130deg,var(--gold-lt),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav>
-  <span class="nav-logo">&#9670; My Gallery</span>
-  <div class="nav-actions">
-    <button class="btn btn-ghost" onclick="openCatModal()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h8M4 18h12"/></svg>
-      Categories
-    </button>
-    <button class="btn btn-primary" onclick="openUploadModal()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7-7 7 7"/></svg>
-      Add Photo
-    </button>
-  </div>
-</nav>
+<div id="loader"><div class="load-logo">Glimpse</div><div class="spin"></div></div>
 
-<!-- HERO -->
-<div class="hero">
-  <h1>My Personal Gallery</h1>
-  <p>A beautiful collection of things I love ✦</p>
-</div>
-
-<!-- CATEGORY BAR -->
-<div class="cat-bar" id="cat-bar">
-  <!-- pills injected by JS -->
-</div>
-
-<!-- STATS -->
-<div class="stats" id="stats-bar"></div>
-
-<!-- GRID -->
-<div class="grid-wrap">
-  <div class="photo-grid" id="photo-grid"></div>
-  <div class="empty-state hidden" id="empty-state">
-    <div class="icon">&#128247;</div>
-    <p>No photos yet. Click <strong>Add Photo</strong> to start!</p>
+<!-- CONFIG -->
+<div id="cfg" style="display:none">
+  <div class="cfg-card">
+    <h1>Setup Firebase 🔥</h1>
+    <p>Paste your Firebase config to enable Google login, cloud photo storage, and sync across all your devices.</p>
+    <div class="code-block">// Firebase Console → Project Settings → Your Apps → Web
+const firebaseConfig = {
+  apiKey: "AIza...",
+  authDomain: "your-app.firebaseapp.com",
+  projectId: "your-app",
+  storageBucket: "your-app.appspot.com",
+  messagingSenderId: "123456",
+  appId: "1:123456:web:abc"
+};</div>
+    <div class="field"><label>Paste your config JSON here</label>
+      <textarea id="cfg-inp" style="height:110px;font-family:monospace;font-size:12px" placeholder='{"apiKey":"...","authDomain":"...","projectId":"...","storageBucket":"...","messagingSenderId":"...","appId":"..."}'></textarea>
+    </div>
+    <button class="btn btn-gold btn-full" onclick="saveConfig()" style="margin-top:8px">Launch My Gallery ✦</button>
+    <div class="steps">
+      <strong>5-minute setup:</strong><br>
+      1 · Go to <strong>console.firebase.google.com</strong> → New project<br>
+      2 · Add a <strong>Web App</strong> → copy the config object<br>
+      3 · Enable <strong>Authentication</strong> → Email/Password + Google<br>
+      4 · Enable <strong>Firestore Database</strong> → test mode<br>
+      5 · Enable <strong>Storage</strong> → test mode<br>
+      6 · Paste config above and hit Launch!
+    </div>
   </div>
 </div>
 
-<!-- ── UPLOAD MODAL ── -->
-<div class="modal-bg hidden" id="upload-modal">
+<!-- AUTH -->
+<div id="auth" style="display:none">
+  <div class="auth-card">
+    <div class="auth-logo">Glimpse</div>
+    <p class="auth-tagline">Your personal public gallery ✦</p>
+    <button class="g-btn" onclick="loginGoogle()">
+      <svg viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+      Continue with Google
+    </button>
+    <div class="divider">or</div>
+    <div class="field"><label>Email</label><input type="email" id="e-email" placeholder="you@example.com"/></div>
+    <div class="field"><label>Password</label><input type="password" id="e-pass" placeholder="••••••••"/></div>
+    <div class="field" id="name-row" style="display:none"><label>Display Name</label><input type="text" id="e-name" placeholder="Your name"/></div>
+    <button class="btn btn-gold btn-full" id="auth-btn" onclick="emailAuth()" style="margin-top:4px">Sign In</button>
+    <p class="auth-switch" id="auth-sw">No account? <span onclick="toggleMode()">Create one</span></p>
+    <p style="text-align:center;margin-top:14px;font-size:11px;color:var(--muted)"><span style="cursor:pointer;text-decoration:underline" onclick="resetCfg()">Reset Firebase config</span></p>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <nav>
+    <span class="logo">Glimpse</span>
+    <div class="nav-r">
+      <button class="btn btn-ghost" id="cat-nav-btn" onclick="openCatModal()" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h8M4 18h12"/></svg> Categories
+      </button>
+      <button class="btn btn-gold" id="up-btn" onclick="openUpload()" style="display:none">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12l7-7 7 7"/></svg> Add Photo
+      </button>
+      <div class="av" id="nav-av" onclick="toggleMenu()"></div>
+    </div>
+  </nav>
+
+  <div class="umenu" id="umenu">
+    <div class="umenu-header">
+      <div class="umenu-name" id="m-name">—</div>
+      <div class="umenu-email" id="m-email">—</div>
+    </div>
+    <button class="mi" onclick="openUpload();closeMenu()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7-7 7 7"/></svg> Add Photo</button>
+    <button class="mi" onclick="openCatModal();closeMenu()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h8M4 18h12"/></svg> Categories</button>
+    <button class="mi red" onclick="doSignOut()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg> Sign Out</button>
+  </div>
+
+  <div class="hero">
+    <h1 id="hero-h">Gallery</h1>
+    <p id="hero-p">A beautiful space for things you love</p>
+  </div>
+  <div class="cat-bar" id="cat-bar"></div>
+  <div class="stats-bar" id="stats-bar"></div>
+  <div class="grid-outer">
+    <div class="grid" id="grid"></div>
+    <div class="empty" id="empty" style="display:none"><div class="empty-ico">✦</div><p>Nothing here yet — add the first photo!</p></div>
+  </div>
+</div>
+
+<!-- UPLOAD MODAL -->
+<div class="mb h" id="up-modal">
   <div class="modal">
     <h2>Add a Photo</h2>
-    <button class="modal-close" onclick="closeUploadModal()">&#215;</button>
-
-    <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
-      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--accent);margin:0 auto;display:block"><path d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+    <button class="mclose" onclick="closeUpload()">×</button>
+    <div class="dz" id="dz" onclick="document.getElementById('fi').click()">
+      <div class="dz-ico">☁</div>
       <p>Click or drag &amp; drop image here</p>
-      <p style="font-size:11px;margin-top:3px">JPG, PNG, WebP, GIF supported</p>
+      <p style="font-size:11px;margin-top:3px">JPG · PNG · WebP · GIF</p>
     </div>
-    <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFile(event)" />
-
-    <div id="img-preview-wrap">
-      <img id="img-preview" src="" alt="Preview" />
+    <input type="file" id="fi" accept="image/*" style="display:none" onchange="onFile(event)"/>
+    <div id="prev-wrap"><img id="prev" src="" alt="preview"/></div>
+    <div class="field"><label>Caption</label><textarea id="cap-inp" placeholder="Describe this photo…"></textarea></div>
+    <div class="field"><label>Category</label><select id="cat-sel"></select></div>
+    <div class="prog-outer" id="prog-outer">
+      <div class="prog-bar"><div class="prog-fill" id="prog-fill"></div></div>
+      <div class="prog-lbl" id="prog-lbl">Uploading…</div>
     </div>
-
-    <div class="field">
-      <label>Caption</label>
-      <textarea id="caption-input" placeholder="Describe this photo…"></textarea>
-    </div>
-    <div class="field">
-      <label>Category</label>
-      <select id="cat-select">
-        <!-- options injected by JS -->
-      </select>
-    </div>
-
-    <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="addPhoto()">Save to Gallery</button>
+    <button class="btn btn-gold btn-full" id="save-btn" onclick="submitPhoto()">Save to Gallery</button>
   </div>
 </div>
 
-<!-- ── CATEGORIES MODAL ── -->
-<div class="modal-bg hidden" id="cat-modal">
+<!-- CATEGORIES MODAL -->
+<div class="mb h" id="cat-modal">
   <div class="modal">
     <h2>Manage Categories</h2>
-    <button class="modal-close" onclick="document.getElementById('cat-modal').classList.add('hidden')">&#215;</button>
-    <div class="cat-list" id="cat-list"></div>
+    <button class="mclose" onclick="closeCatModal()">×</button>
+    <div class="cat-tags" id="ctags"></div>
     <div class="add-cat-row">
-      <input type="text" id="new-cat-input" placeholder="New category…" onkeydown="if(event.key==='Enter')addCategory()" />
-      <button class="btn btn-primary" onclick="addCategory()">Add</button>
+      <div class="field"><input type="text" id="new-cat" placeholder="New category…" onkeydown="if(event.key==='Enter')addCat()"/></div>
+      <button class="btn btn-outline" onclick="addCat()">Add</button>
     </div>
   </div>
 </div>
 
-<!-- ── LIGHTBOX ── -->
-<div class="lightbox hidden" id="lightbox" onclick="closeLightbox()">
-  <button class="lightbox-close" onclick="closeLightbox()">&#215;</button>
-  <img id="lightbox-img" src="" alt="" />
-  <div class="lightbox-caption" id="lightbox-caption"></div>
+<!-- LIGHTBOX -->
+<div class="lb h" id="lb" onclick="closeLb()">
+  <button class="lb-close" onclick="closeLb()">×</button>
+  <div class="lb-inner" onclick="event.stopPropagation()">
+    <img id="lb-img" src="" alt=""/>
+    <div class="lb-info">
+      <div>
+        <div class="lb-cap" id="lb-cap"></div>
+        <div class="lb-auth" id="lb-auth"></div>
+      </div>
+      <span class="lb-cat-badge" id="lb-cat"></span>
+    </div>
+  </div>
 </div>
 
-<!-- ── TOAST ── -->
 <div id="toast"></div>
 
-<script>
-const STORAGE_KEY = 'gallery_v2';
-const CAT_KEY = 'gallery_cats_v2';
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+import{getAuth,onAuthStateChanged,signInWithPopup,GoogleAuthProvider,
+  createUserWithEmailAndPassword,signInWithEmailAndPassword,
+  updateProfile,signOut as fbOut}
+  from'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+import{getFirestore,collection,addDoc,onSnapshot,deleteDoc,doc,
+  orderBy,query,serverTimestamp,getDoc,setDoc}
+  from'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import{getStorage,ref,uploadBytesResumable,getDownloadURL,deleteObject}
+  from'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
 
-const DEFAULT_CATS = ['Travel', 'Birds', 'School', 'Sky', 'Leaves', 'Food', 'People', 'Nature'];
+const CFG_KEY='glimpse_fb_cfg2';
+let fbCfg=null;
+try{fbCfg=JSON.parse(localStorage.getItem(CFG_KEY));}catch{}
 
-function loadData() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; }
-}
-function saveData(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
-function loadCats() {
-  try { return JSON.parse(localStorage.getItem(CAT_KEY)) || DEFAULT_CATS; } catch { return DEFAULT_CATS; }
-}
-function saveCats(c) { localStorage.setItem(CAT_KEY, JSON.stringify(c)); }
+const $=id=>document.getElementById(id);
+const hide=id=>{$(id).style.display='none'};
+const show=(id,d='block')=>{$(id).style.display=d};
 
-let photos = loadData();
-let categories = loadCats();
-let activeFilter = 'All';
-let pendingDataUrl = null;
+hide('loader');
+if(!fbCfg){show('cfg','flex');}else{boot(fbCfg);}
 
-/* ── RENDER ── */
-function render() {
-  renderCatBar();
-  renderGrid();
-  renderCatModal();
-  renderCatSelect();
-  renderStats();
-}
+window.saveConfig=()=>{
+  let raw=$('cfg-inp').value.trim();
+  let cfg;
+  try{
+    let j=raw;
+    if(!j.startsWith('{')){const m=raw.match(/\{[\s\S]+\}/);if(m)j=m[0];}
+    j=j.replace(/([{,]\s*)(\w+)\s*:/g,'$1"$2":').replace(/'/g,'"');
+    cfg=JSON.parse(j);
+  }catch{toast('❌ Invalid JSON — check your config');return;}
+  if(!cfg.apiKey||!cfg.projectId){toast('❌ Missing apiKey or projectId');return;}
+  localStorage.setItem(CFG_KEY,JSON.stringify(cfg));
+  hide('cfg');show('loader');
+  boot(cfg);
+};
+window.resetCfg=()=>{
+  if(!confirm('Reset Firebase config?'))return;
+  localStorage.removeItem(CFG_KEY);location.reload();
+};
 
-function renderCatBar() {
-  const bar = document.getElementById('cat-bar');
-  const all = ['All', ...categories];
-  bar.innerHTML = all.map(c =>
-    `<div class="cat-pill${activeFilter===c?' active':''}" onclick="filterBy('${c}')">${c}</div>`
-  ).join('');
-}
-
-function renderStats() {
-  const total = photos.length;
-  const filtered = getFiltered().length;
-  const el = document.getElementById('stats-bar');
-  if (!total) { el.textContent = ''; return; }
-  el.textContent = activeFilter === 'All'
-    ? `${total} photo${total!==1?'s':''} · ${categories.length} categories`
-    : `${filtered} photo${filtered!==1?'s':''} in "${activeFilter}"`;
-}
-
-function getFiltered() {
-  return activeFilter === 'All' ? photos : photos.filter(p => p.cat === activeFilter);
-}
-
-function renderGrid() {
-  const grid = document.getElementById('photo-grid');
-  const empty = document.getElementById('empty-state');
-  const filtered = getFiltered();
-  if (!filtered.length) {
-    grid.innerHTML = '';
-    empty.classList.remove('hidden');
-    return;
+function boot(cfg){
+  let app,auth,db,storage;
+  try{
+    app=initializeApp(cfg);
+    auth=getAuth(app);
+    db=getFirestore(app);
+    storage=getStorage(app);
+  }catch(e){
+    hide('loader');show('cfg','flex');
+    toast('❌ Firebase init failed: '+e.message);return;
   }
-  empty.classList.add('hidden');
-  grid.innerHTML = filtered.map((p, i) => `
-    <div class="photo-card" data-id="${p.id}">
-      <img src="${p.src}" alt="${escHtml(p.caption)}" loading="lazy"
-        onclick="openLightbox('${p.id}')" />
-      <div class="card-info">
-        <div class="card-caption">${escHtml(p.caption) || '<span style="color:var(--text-muted);font-style:italic">No caption</span>'}</div>
-        <span class="card-cat">${escHtml(p.cat)}</span>
-      </div>
-      <button class="card-delete" onclick="deletePhoto('${p.id}')" title="Delete photo">&#215;</button>
-    </div>
-  `).join('');
-}
 
-function renderCatSelect() {
-  const sel = document.getElementById('cat-select');
-  sel.innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join('');
-}
+  let user=null,photos=[],cats=['Travel','Birds','School','Sky','Leaves','Food','People','Nature'];
+  let filter='All',pendingFile=null,mode='signin',unsub=null;
 
-function renderCatModal() {
-  const list = document.getElementById('cat-list');
-  list.innerHTML = categories.map(c =>
-    `<span class="cat-tag">${escHtml(c)} <button onclick="deleteCategory('${c}')" title="Remove">&times;</button></span>`
-  ).join('');
-}
+  /* AUTH STATE */
+  onAuthStateChanged(auth,async u=>{
+    hide('loader');
+    if(u){
+      user=u;
+      show('app');hide('auth');
+      $('up-btn').style.display='inline-flex';
+      $('cat-nav-btn').style.display='inline-flex';
+      setAvatar(u);setMenu(u);
+      const first=(u.displayName||'').split(' ')[0];
+      if(first)$('hero-h').textContent=first+"'s Gallery";
+      await loadCats(u.uid);
+      subscribe();
+    }else{
+      user=null;
+      if(unsub){unsub();unsub=null;}
+      hide('app');show('auth','flex');
+      $('up-btn').style.display='none';
+      $('cat-nav-btn').style.display='none';
+    }
+  });
 
-/* ── FILTER ── */
-function filterBy(cat) {
-  activeFilter = cat;
-  render();
-}
+  function setAvatar(u){
+    const av=$('nav-av');
+    av.innerHTML=u.photoURL?`<img src="${u.photoURL}" alt="av"/>`:(u.displayName||u.email||'?')[0].toUpperCase();
+  }
+  function setMenu(u){
+    $('m-name').textContent=u.displayName||'User';
+    $('m-email').textContent=u.email||'';
+  }
 
-/* ── ADD PHOTO ── */
-function openUploadModal() {
-  pendingDataUrl = null;
-  document.getElementById('img-preview-wrap').style.display = 'none';
-  document.getElementById('caption-input').value = '';
-  document.getElementById('file-input').value = '';
-  document.getElementById('upload-modal').classList.remove('hidden');
-}
-function closeUploadModal() {
-  document.getElementById('upload-modal').classList.add('hidden');
-  pendingDataUrl = null;
-}
+  /* SUBSCRIBE */
+  function subscribe(){
+    const q=query(collection(db,'photos'),orderBy('createdAt','desc'));
+    unsub=onSnapshot(q,snap=>{
+      photos=snap.docs.map(d=>({id:d.id,...d.data()}));
+      render();
+    });
+  }
 
-function handleFile(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    pendingDataUrl = ev.target.result;
-    const preview = document.getElementById('img-preview');
-    preview.src = pendingDataUrl;
-    document.getElementById('img-preview-wrap').style.display = 'block';
+  /* CATS */
+  async function loadCats(uid){
+    try{
+      const s=await getDoc(doc(db,'users',uid));
+      if(s.exists()&&s.data().categories)cats=s.data().categories;
+    }catch{}
+    renderSel();
+  }
+  async function saveCats(){
+    if(!user)return;
+    try{await setDoc(doc(db,'users',user.uid),{categories:cats},{merge:true});}catch{}
+  }
+
+  /* AUTH */
+  window.loginGoogle=async()=>{
+    try{await signInWithPopup(auth,new GoogleAuthProvider());}
+    catch(e){toast('❌ '+e.message);}
   };
-  reader.readAsDataURL(file);
-}
-
-function addPhoto() {
-  if (!pendingDataUrl) { toast('Please select an image first!'); return; }
-  const caption = document.getElementById('caption-input').value.trim();
-  const cat = document.getElementById('cat-select').value;
-  photos.unshift({ id: uid(), src: pendingDataUrl, caption, cat, ts: Date.now() });
-  saveData(photos);
-  closeUploadModal();
-  render();
-  toast('Photo added!');
-}
-
-/* ── DELETE ── */
-function deletePhoto(id) {
-  if (!confirm('Delete this photo?')) return;
-  photos = photos.filter(p => p.id !== id);
-  saveData(photos);
-  render();
-  toast('Photo deleted');
-}
-
-/* ── LIGHTBOX ── */
-function openLightbox(id) {
-  const p = photos.find(x => x.id === id);
-  if (!p) return;
-  document.getElementById('lightbox-img').src = p.src;
-  document.getElementById('lightbox-caption').textContent =
-    (p.caption ? p.caption + ' · ' : '') + p.cat;
-  document.getElementById('lightbox').classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
-}
-function closeLightbox() {
-  document.getElementById('lightbox').classList.add('hidden');
-  document.body.style.overflow = '';
-}
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeLightbox(); closeUploadModal(); } });
-
-/* ── CATEGORIES ── */
-function openCatModal() {
-  renderCatModal();
-  document.getElementById('cat-modal').classList.remove('hidden');
-}
-function addCategory() {
-  const inp = document.getElementById('new-cat-input');
-  const val = inp.value.trim();
-  if (!val) return;
-  if (categories.map(c=>c.toLowerCase()).includes(val.toLowerCase())) { toast('Already exists!'); return; }
-  categories.push(val.charAt(0).toUpperCase() + val.slice(1));
-  saveCats(categories);
-  inp.value = '';
-  render();
-  toast(`"${val}" added`);
-}
-function deleteCategory(cat) {
-  const inUse = photos.some(p => p.cat === cat);
-  if (inUse && !confirm(`"${cat}" is used by some photos. Delete anyway?`)) return;
-  categories = categories.filter(c => c !== cat);
-  saveCats(categories);
-  if (activeFilter === cat) activeFilter = 'All';
-  render();
-  toast(`"${cat}" removed`);
-}
-
-/* ── DRAG & DROP ── */
-const dz = document.getElementById('drop-zone');
-dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
-dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
-dz.addEventListener('drop', e => {
-  e.preventDefault();
-  dz.classList.remove('drag-over');
-  const file = e.dataTransfer.files[0];
-  if (!file || !file.type.startsWith('image/')) { toast('Please drop an image file'); return; }
-  const reader = new FileReader();
-  reader.onload = ev => {
-    pendingDataUrl = ev.target.result;
-    document.getElementById('img-preview').src = pendingDataUrl;
-    document.getElementById('img-preview-wrap').style.display = 'block';
+  window.emailAuth=async()=>{
+    const em=$('e-email').value.trim(),pw=$('e-pass').value;
+    if(!em||!pw){toast('Enter email and password');return;}
+    try{
+      if(mode==='signup'){
+        const nm=$('e-name').value.trim();
+        const cr=await createUserWithEmailAndPassword(auth,em,pw);
+        if(nm)await updateProfile(cr.user,{displayName:nm});
+      }else{await signInWithEmailAndPassword(auth,em,pw);}
+    }catch(e){toast('❌ '+(e.message||'Auth failed'));}
   };
-  reader.readAsDataURL(file);
-});
+  window.toggleMode=()=>{
+    mode=mode==='signin'?'signup':'signin';
+    const su=mode==='signup';
+    $('auth-btn').textContent=su?'Create Account':'Sign In';
+    $('auth-sw').innerHTML=su?`Have an account? <span onclick="toggleMode()">Sign in</span>`:`No account? <span onclick="toggleMode()">Create one</span>`;
+    $('name-row').style.display=su?'':'none';
+  };
+  window.doSignOut=async()=>{closeMenu();await fbOut(auth);toast('Signed out');};
 
-/* ── TOAST ── */
-let toastTimer;
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+  /* MENU */
+  window.toggleMenu=()=>$('umenu').classList.toggle('open');
+  window.closeMenu=()=>$('umenu').classList.remove('open');
+  document.addEventListener('click',e=>{
+    if(!$('umenu').contains(e.target)&&!$('nav-av').contains(e.target))
+      $('umenu').classList.remove('open');
+  });
+
+  /* UPLOAD */
+  window.openUpload=()=>{
+    if(!user){toast('Sign in first');return;}
+    pendingFile=null;
+    $('prev-wrap').style.display='none';
+    $('cap-inp').value='';$('fi').value='';
+    $('prog-outer').style.display='none';
+    $('save-btn').disabled=false;
+    $('up-modal').classList.remove('h');
+  };
+  window.closeUpload=()=>{$('up-modal').classList.add('h');pendingFile=null;};
+  window.onFile=e=>{
+    const f=e.target.files[0];if(!f)return;
+    pendingFile=f;
+    $('prev').src=URL.createObjectURL(f);
+    $('prev-wrap').style.display='block';
+  };
+  window.submitPhoto=async()=>{
+    if(!pendingFile){toast('Select an image first');return;}
+    const cap=$('cap-inp').value.trim();
+    const cat=$('cat-sel').value;
+    $('save-btn').disabled=true;
+    $('prog-outer').style.display='block';
+    const path=`photos/${user.uid}/${Date.now()}_${pendingFile.name}`;
+    const task=uploadBytesResumable(ref(storage,path),pendingFile);
+    task.on('state_changed',
+      s=>{const p=Math.round(s.bytesTransferred/s.totalBytes*100);$('prog-fill').style.width=p+'%';$('prog-lbl').textContent=`Uploading… ${p}%`;},
+      err=>{toast('❌ '+err.message);$('save-btn').disabled=false;$('prog-outer').style.display='none';},
+      async()=>{
+        const url=await getDownloadURL(task.snapshot.ref);
+        await addDoc(collection(db,'photos'),{
+          url,caption:cap,cat,storagePath:path,
+          uid:user.uid,
+          authorName:user.displayName||'Anonymous',
+          authorPhoto:user.photoURL||null,
+          createdAt:serverTimestamp()
+        });
+        closeUpload();toast('✦ Photo added!');
+      }
+    );
+  };
+
+  /* DELETE */
+  window.deletePhoto=async(id,sp)=>{
+    if(!confirm('Delete this photo?'))return;
+    try{
+      await deleteDoc(doc(db,'photos',id));
+      if(sp){try{await deleteObject(ref(storage,sp));}catch{}}
+      toast('Photo deleted');
+    }catch(e){toast('❌ '+e.message);}
+  };
+
+  /* CATS MODAL */
+  window.openCatModal=()=>{renderCatTags();$('cat-modal').classList.remove('h');};
+  window.closeCatModal=()=>$('cat-modal').classList.add('h');
+  window.addCat=async()=>{
+    const v=$('new-cat').value.trim();if(!v)return;
+    if(cats.map(c=>c.toLowerCase()).includes(v.toLowerCase())){toast('Already exists');return;}
+    cats.push(v.charAt(0).toUpperCase()+v.slice(1));
+    await saveCats();$('new-cat').value='';
+    renderCatTags();renderBar();renderSel();toast(`"${v}" added`);
+  };
+  window.deleteCat=async cat=>{
+    if(photos.some(p=>p.cat===cat)&&!confirm(`"${cat}" is in use. Remove?`))return;
+    cats=cats.filter(c=>c!==cat);
+    await saveCats();
+    if(filter===cat)filter='All';
+    renderCatTags();renderBar();renderSel();render();toast(`"${cat}" removed`);
+  };
+  function renderCatTags(){
+    $('ctags').innerHTML=cats.map(c=>`<span class="ctag">${esc(c)} <button class="ctag-x" onclick="deleteCat('${c}')">×</button></span>`).join('');
+  }
+  function renderSel(){
+    $('cat-sel').innerHTML=cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+  }
+
+  /* FILTER */
+  window.filterBy=cat=>{filter=cat;render();};
+
+  /* LIGHTBOX */
+  window.openLb=id=>{
+    const p=photos.find(x=>x.id===id);if(!p)return;
+    $('lb-img').src=p.url;
+    $('lb-cap').textContent=p.caption||'';
+    $('lb-cat').textContent=p.cat||'';
+    $('lb-auth').textContent=p.authorName?'by '+p.authorName:'';
+    $('lb').classList.remove('h');
+    document.body.style.overflow='hidden';
+  };
+  window.closeLb=()=>{$('lb').classList.add('h');document.body.style.overflow='';};
+
+  /* DRAG DROP */
+  const dz=$('dz');
+  dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('over');});
+  dz.addEventListener('dragleave',()=>dz.classList.remove('over'));
+  dz.addEventListener('drop',e=>{
+    e.preventDefault();dz.classList.remove('over');
+    const f=e.dataTransfer.files[0];
+    if(!f||!f.type.startsWith('image/')){toast('Drop an image file');return;}
+    pendingFile=f;$('prev').src=URL.createObjectURL(f);$('prev-wrap').style.display='block';
+  });
+
+  /* KEYBOARD */
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape'){closeLb();closeUpload();$('cat-modal').classList.add('h');}
+  });
+
+  /* RENDER */
+  function filtered(){return filter==='All'?photos:photos.filter(p=>p.cat===filter);}
+  function render(){renderBar();renderGrid();renderStats();}
+
+  function renderBar(){
+    $('cat-bar').innerHTML=['All',...cats].map(c=>
+      `<div class="pill${filter===c?' active':''}" onclick="filterBy('${c}')">${c}</div>`
+    ).join('');
+  }
+  function renderStats(){
+    const t=photos.length,f=filtered().length,el=$('stats-bar');
+    if(!t){el.textContent='';return;}
+    el.textContent=filter==='All'?`${t} photo${t!==1?'s':''} from the community`:`${f} photo${f!==1?'s':''} in "${filter}"`;
+  }
+  function renderGrid(){
+    const list=filtered();
+    const grid=$('grid'),emp=$('empty');
+    if(!list.length){grid.innerHTML='';emp.style.display='block';return;}
+    emp.style.display='none';
+    grid.innerHTML=list.map(p=>{
+      const mine=user&&p.uid===user.uid;
+      const av=p.authorPhoto?`<div class="ov-av"><img src="${p.authorPhoto}" alt=""/></div>`:`<div class="ov-av">${((p.authorName||'?')[0]).toUpperCase()}</div>`;
+      return `<div class="card">
+        <img src="${p.url}" alt="${esc(p.caption)}" loading="lazy" onclick="openLb('${p.id}')"/>
+        <div class="overlay">
+          <div class="ov-caption">${esc(p.caption)||'<em style="opacity:.4">No caption</em>'}</div>
+          <span class="ov-cat">${esc(p.cat)}</span>
+          <div class="ov-author">${av}<span>${esc(p.authorName||'Anonymous')}</span></div>
+        </div>
+        ${mine?`<button class="del-btn mine" onclick="deletePhoto('${p.id}','${(p.storagePath||'').replace(/'/g,"\\'")}')">×</button>`:''}
+      </div>`;
+    }).join('');
+  }
+
+  function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 }
 
-/* ── HELPERS ── */
-function uid() { return Math.random().toString(36).slice(2) + Date.now().toString(36); }
-function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-/* ── INIT ── */
-render();
+/* TOAST */
+let tt;
+window.toast=msg=>{
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),2400);
+};
+function toast(m){window.toast(m);}
 </script>
 </body>
 </html>
